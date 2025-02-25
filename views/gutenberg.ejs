@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gutenberg Books</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include("partials/header") %>
+
+    <main>
+        <h2>Search Gutenberg Books</h2>
+
+        <!-- Search Form -->
+        <form id="searchForm">
+            <input type="text" id="searchQuery" name="searchQuery" placeholder="Enter book title or author">
+            <button type="submit">Search</button>
+        </form>
+
+        <!-- Results Section -->
+        <section id="results">
+            <% if (books.length > 0) { %>
+                <h3>Search Results</h3>
+                <ul>
+                    <% books.forEach(book => { %>
+                        <li>
+                            <strong><%= book.title %></strong> by <%= book.author %>
+                            <br>
+                            <a href="<%= book.link %>" target="_blank">Read Book</a>
+                        </li>
+                    <% }); %>
+                </ul>
+            <% } else { %>
+                <p>No books found. Try another search.</p>
+            <% } %>
+        </section>
+    </main>
+
+    <script>
+        document.getElementById("searchForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const query = document.getElementById("searchQuery").value;
+            
+            fetch(`/gutenberg/search?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsSection = document.getElementById("results");
+                    resultsSection.innerHTML = "<h3>Search Results</h3>";
+
+                    if (data.books.length > 0) {
+                        const list = document.createElement("ul");
+                        data.books.forEach(book => {
+                            const listItem = document.createElement("li");
+                            listItem.innerHTML = `<strong>${book.title}</strong> by ${book.author} <br> 
+                                                  <a href="${book.link}" target="_blank">Read Book</a>`;
+                            list.appendChild(listItem);
+                        });
+                        resultsSection.appendChild(list);
+                    } else {
+                        resultsSection.innerHTML += "<p>No books found. Try another search.</p>";
+                    }
+                })
+                .catch(error => console.error("Error fetching books:", error));
+        });
+    </script>
+
+    <%- include("partials/footer") %>
+</body>
+</html>
