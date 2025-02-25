@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include("partials/header") %>
+
+    <main>
+        <h2>Quiz</h2>
+        <p>Answer the following questions before the time runs out!</p>
+
+        <!-- Timer Display -->
+        <div id="timer">Time Left: <span id="timeLeft">60</span> seconds</div>
+
+        <!-- Quiz Form -->
+        <form id="quizForm">
+            <% questions.forEach((question, index) => { %>
+                <div class="question">
+                    <p><strong>Q<%= index + 1 %>: <%= question.text %></strong></p>
+                    <% question.options.forEach((option, optionIndex) => { %>
+                        <label>
+                            <input type="radio" name="question_<%= index %>" value="<%= option %>">
+                            <%= option %>
+                        </label>
+                    <% }); %>
+                </div>
+            <% }); %>
+            <button type="submit">Submit Quiz</button>
+        </form>
+
+        <p id="quizFeedback"></p>
+    </main>
+
+    <script>
+        let timeLeft = 60; // Quiz duration in seconds
+        const timerElement = document.getElementById("timeLeft");
+
+        const countdown = setInterval(() => {
+            if (timeLeft > 0) {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+            } else {
+                clearInterval(countdown);
+                document.getElementById("quizForm").submit(); // Auto-submit on timeout
+            }
+        }, 1000);
+
+        document.getElementById("quizForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(this);
+            fetch("/quiz/submit", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("quizFeedback").textContent = data.message;
+            })
+            .catch(error => console.error("Error submitting quiz:", error));
+        });
+    </script>
+
+    <%- include("partials/footer") %>
+</body>
+</html>
