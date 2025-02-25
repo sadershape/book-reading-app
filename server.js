@@ -3,10 +3,10 @@ import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
 import errorHandler from "./backend/middleware/errorMiddleware.js";
-import bookRoutes from "./routes/bookRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-import quizRoutes from "./routes/quizRoutes.js";
+import bookRoutes from "./backend/routes/bookRoutes.js";
+import userRoutes from "./backend/routes/userRoutes.js";
+import authRoutes from "./backend/routes/authRoutes.js";
+import quizRoutes from "./backend/routes/quizRoutes.js";
 
 dotenv.config(); // Load environment variables
 
