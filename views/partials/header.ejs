@@ -1,0 +1,13 @@
+<header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/books">Search Books</a>
+        <a href="/quiz">Quiz</a>
+        <% if (user) { %>
+            <a href="/profile">Profile</a>
+            <a href="/logout">Logout</a>
+        <% } else { %>
+            <a href="/login">Login</a>
+        <% } %>
+    </nav>
+</header>
