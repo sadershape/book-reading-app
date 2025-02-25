@@ -1,0 +1,30 @@
+{
+  "name": "book-reading-app",
+  "version": "1.0.0",
+  "description": "A book reading website using Gutenberg & OpenLibrary APIs.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.3",
+    "ejs": "^3.1.10",
+    "express": "^4.18.2",
+    "express-flash": "^0.0.2",
+    "express-session": "^1.18.1",
+    "i18next": "^24.2.2",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.0.0",
+    "multer": "^1.4.5-lts.1",
+    "tailwindcss": "^4.0.9"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
