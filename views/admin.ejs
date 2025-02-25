@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include("partials/header") %>
+
+    <main>
+        <h2>Admin Dashboard</h2>
+
+        <!-- Section for Managing Users -->
+        <section>
+            <h3>Manage Users</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(user => { %>
+                        <tr>
+                            <td><%= user.username %></td>
+                            <td><%= user.role %></td>
+                            <td>
+                                <form action="/admin/update-password" method="POST">
+                                    <input type="hidden" name="userId" value="<%= user._id %>">
+                                    <input type="password" name="newPassword" placeholder="New Password" required>
+                                    <button type="submit">Update</button>
+                                </form>
+                                <form action="/admin/delete-user" method="POST">
+                                    <input type="hidden" name="userId" value="<%= user._id %>">
+                                    <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+            <a href="/admin/add-user" class="btn">Add New User</a>
+        </section>
+
+        <!-- Section for Managing Main Page Content -->
+        <section>
+            <h3>Manage Library Content</h3>
+            <form action="/admin/update-main-content" method="POST" enctype="multipart/form-data">
+                <label for="mainImage">Main Image:</label>
+                <input type="file" id="mainImage" name="mainImage">
+
+                <label for="mainText">Library Description:</label>
+                <textarea id="mainText" name="mainText"><%= mainContent.text %></textarea>
+
+                <button type="submit">Update</button>
+            </form>
+        </section>
+
+        <!-- Section for Managing Quizzes -->
+        <section>
+            <h3>Manage Quizzes</h3>
+            <a href="/admin/add-quiz" class="btn">Add New Quiz</a>
+            <ul>
+                <% quizzes.forEach(quiz => { %>
+                    <li>
+                        <strong><%= quiz.title %></strong> 
+                        <a href="/admin/edit-quiz/<%= quiz._id %>">Edit</a>
+                        <form action="/admin/delete-quiz" method="POST" style="display:inline;">
+                            <input type="hidden" name="quizId" value="<%= quiz._id %>">
+                            <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </li>
+                <% }); %>
+            </ul>
+        </section>
+
+    </main>
+
+    <%- include("partials/footer") %>
+</body>
+</html>
