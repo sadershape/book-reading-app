@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include("partials/header") %>
+
+    <main>
+        <h2>Welcome, <%= user.username %>!</h2>
+        <p><strong>Username:</strong> <%= user.username %></p>
+        <p><strong>Password:</strong> ********</p> <!-- Hide password for security -->
+
+        <h3>Quiz Results</h3>
+        <% if (quizResults.length > 0) { %>
+            <ul>
+                <% quizResults.forEach(result => { %>
+                    <li>
+                        <strong>Score:</strong> <%= result.score %>/100 
+                        <br>
+                        <strong>Date:</strong> <%= new Date(result.date).toLocaleDateString() %>
+                    </li>
+                <% }); %>
+            </ul>
+        <% } else { %>
+            <p>No quiz results yet.</p>
+        <% } %>
+
+        <a href="/logout" class="btn">Logout</a>
+    </main>
+
+    <%- include("partials/footer") %>
+</body>
+</html>
