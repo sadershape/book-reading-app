@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
 import path from "path";
+import session from "express-session";
 import { fileURLToPath } from "url";
 import errorHandler from "./backend/middleware/errorMiddleware.js";
 import bookRoutes from "./backend/routes/bookRoutes.js";
@@ -27,6 +28,21 @@ app.use(cors()); // Enable CORS
 app.use(express.json()); // Parse JSON requests
 app.use(express.urlencoded({ extended: true })); // Parse form data
 app.use(express.static(path.join(__dirname, "public"))); // Serve static files
+
+// Session middleware (for storing logged-in user)
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// Pass user data to all views
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
 
 // Routes
 app.use("/api/books", bookRoutes);
