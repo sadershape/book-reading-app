@@ -4,6 +4,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import path from "path";
 import session from "express-session";
+import MemoryStore from "memorystore";
 import { fileURLToPath } from "url";
 import errorHandler from "./backend/middleware/errorMiddleware.js";
 import bookRoutes from "./backend/routes/bookRoutes.js";
@@ -30,12 +31,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// Use express-session (without memorystore)
+// Use express-session with MemoryStore
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
+    store: new (MemoryStore(session))({
+      checkPeriod: 86400000, // Remove expired sessions every 24h
+    }),
     cookie: { secure: process.env.NODE_ENV === "production" }, // Secure in production
   })
 );
