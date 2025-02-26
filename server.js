@@ -1,25 +1,24 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const path = require("path");
-const session = require("express-session");
-const MemoryStore = require("memorystore")(session);
-const errorHandler = require("./backend/middleware/errorMiddleware");
-const bookRoutes = require("./backend/routes/bookRoutes");
-const userRoutes = require("./backend/routes/userRoutes");
-const authRoutes = require("./backend/routes/authRoutes");
-const quizRoutes = require("./backend/routes/quizRoutes");
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import mongoose from "mongoose";
+import path from "path";
+import session from "express-session";
+import MemoryStore from "memorystore";
+import { fileURLToPath } from "url";
+import errorHandler from "./backend/middleware/errorMiddleware.js";
+import bookRoutes from "./backend/routes/bookRoutes.js";
+import userRoutes from "./backend/routes/userRoutes.js";
+import authRoutes from "./backend/routes/authRoutes.js";
+import quizRoutes from "./backend/routes/quizRoutes.js";
 
 dotenv.config();
 
-// Ensure MongoDB URI is set
-if (!process.env.MONGO_URI) {
-  console.error("❌ MONGO_URI is not defined in .env!");
-  process.exit(1);
-}
-
 const app = express();
+
+// Resolve __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Set view engine
 app.set("view engine", "ejs");
@@ -37,7 +36,7 @@ app.use(
     secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
-    store: new MemoryStore({
+    store: new (MemoryStore(session))({
       checkPeriod: 86400000, // Remove expired sessions every 24h
     }),
     cookie: { secure: process.env.NODE_ENV === "production" }, // Secure in production
