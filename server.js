@@ -4,7 +4,6 @@ import cors from "cors";
 import mongoose from "mongoose";
 import path from "path";
 import session from "express-session";
-import MongoStore from "connect-mongo";
 import { fileURLToPath } from "url";
 import errorHandler from "./backend/middleware/errorMiddleware.js";
 import bookRoutes from "./backend/routes/bookRoutes.js";
@@ -12,67 +11,80 @@ import userRoutes from "./backend/routes/userRoutes.js";
 import authRoutes from "./backend/routes/authRoutes.js";
 import quizRoutes from "./backend/routes/quizRoutes.js";
 
-dotenv.config(); // Load environment variables
+// Load environment variables
+dotenv.config();
 
-const app = express();
+// Ensure MongoDB URI is set
+if (!process.env.MONGO_URI) {
+  console.error("❌ MONGO_URI is not defined in .env!");
+  process.exit(1);
+}
 
 // Resolve __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const app = express();
 
 // Set view engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // Middleware
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse JSON requests
-app.use(express.urlencoded({ extended: true })); // Parse form data
-app.use(express.static(path.join(__dirname, "public"))); // Serve static files
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
 
-// Session middleware (for storing logged-in user)
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "your-secret-key",
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI, // Use MongoDB for session storage
-      collectionName: "sessions",
-    }),
-    cookie: { secure: false }, // Set secure: true in production with HTTPS
-  })
-);
+// Import connect-mongo dynamically to fix ERR_MODULE_NOT_FOUND in deployment
+let MongoStore;
+import("connect-mongo").then((module) => {
+  MongoStore = module.default;
 
-// Pass user data to all views
-app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
-  next();
+  // Session middleware (for storing logged-in user)
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || "your-secret-key",
+      resave: false,
+      saveUninitialized: false,
+      store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URI,
+        collectionName: "sessions",
+      }),
+      cookie: { secure: process.env.NODE_ENV === "production" }, // Secure in production
+    })
+  );
+
+  // Pass user data to all views
+  app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
+    next();
+  });
+
+  // Routes
+  app.use("/api/books", bookRoutes);
+  app.use("/api/users", userRoutes);
+  app.use("/api/auth", authRoutes);
+  app.use("/api/quiz", quizRoutes);
+
+  // Root Route - Render Home Page
+  app.get("/", (req, res) => {
+    res.render("index", { title: "Welcome to Book Reading App" });
+  });
+
+  // Error Handling Middleware
+  app.use(errorHandler);
+
+  // Start Server after connecting to MongoDB
+  mongoose
+    .connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then(() => {
+      console.log(`✅ MongoDB Connected`);
+      const PORT = process.env.PORT || 5000;
+      app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    })
+    .catch((error) => console.error("❌ MongoDB Connection Failed:", error));
 });
-
-// Routes
-app.use("/api/books", bookRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/quiz", quizRoutes);
-
-// Root Route - Render Home Page
-app.get("/", (req, res) => {
-  res.render("index", { title: "Welcome to Book Reading App" });
-});
-
-// Error Handling Middleware
-app.use(errorHandler);
-
-// Connect to MongoDB Atlas & Start Server
-const PORT = process.env.PORT || 5000;
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log(`✅ MongoDB Connected`);
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  })
-  .catch((error) => console.error("❌ MongoDB Connection Failed:", error));
