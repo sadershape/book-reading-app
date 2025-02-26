@@ -4,7 +4,6 @@ import cors from "cors";
 import mongoose from "mongoose";
 import path from "path";
 import session from "express-session";
-import MemoryStore from "memorystore";
 import { fileURLToPath } from "url";
 import errorHandler from "./backend/middleware/errorMiddleware.js";
 import bookRoutes from "./backend/routes/bookRoutes.js";
@@ -12,13 +11,14 @@ import userRoutes from "./backend/routes/userRoutes.js";
 import authRoutes from "./backend/routes/authRoutes.js";
 import quizRoutes from "./backend/routes/quizRoutes.js";
 
+// Load environment variables
 dotenv.config();
-
-const app = express();
 
 // Resolve __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const app = express();
 
 // Set view engine
 app.set("view engine", "ejs");
@@ -30,15 +30,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// Session middleware
+// Use express-session (without memorystore)
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
-    store: new (MemoryStore(session))({
-      checkPeriod: 86400000, // Remove expired sessions every 24h
-    }),
     cookie: { secure: process.env.NODE_ENV === "production" }, // Secure in production
   })
 );
@@ -55,9 +52,13 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/quiz", quizRoutes);
 
-// Root Route - Render Home Page
+// Root Route - Render Home Page with Data
 app.get("/", (req, res) => {
-  res.render("index", { title: "Welcome to Book Reading App" });
+  res.render("index", { 
+    title: "Welcome to Book Reading App",
+    libraryDescription: "A place to explore and read amazing books!", 
+    libraryImage: "/images/default-library.jpg" // Update path if needed
+  });
 });
 
 // Error Handling Middleware
