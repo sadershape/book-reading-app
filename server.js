@@ -4,6 +4,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import path from "path";
 import session from "express-session";
+import MongoStore from "connect-mongo";
 import { fileURLToPath } from "url";
 import errorHandler from "./backend/middleware/errorMiddleware.js";
 import bookRoutes from "./backend/routes/bookRoutes.js";
@@ -35,6 +36,11 @@ app.use(
     secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI, // Use MongoDB for session storage
+      collectionName: "sessions",
+    }),
+    cookie: { secure: false }, // Set secure: true in production with HTTPS
   })
 );
 
